@@ -1,0 +1,1 @@
+[03-Oct-2025 08:23:02 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.3.0". You are running 8.2.28. in /home/jltwn1qq20zto/public_html/vendor/composer/platform_check.php on line 26
