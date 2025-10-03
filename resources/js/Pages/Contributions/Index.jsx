@@ -43,7 +43,7 @@ export default function Index({ auth, contributions, permissions }) {
     fetchMitupoData();
   }, []);
 
-  // Group contributions by mitupo
+  // Group contributions by mitupo - FIXED VERSION
   const groupedContributions = useMemo(() => {
     const groups = {};
 
@@ -60,11 +60,15 @@ export default function Index({ auth, contributions, permissions }) {
       }
 
       groups[mutupoName].contributions.push(contribution);
-      groups[mutupoName].totalAmount += parseFloat(
-        contribution.total_contributed
-      );
-      groups[mutupoName].totalTshirts += contribution.no_of_tshirts;
-      groups[mutupoName].totalCementBags += contribution.no_of_cement_bags;
+
+      // Ensure we're working with numbers, not strings
+      const tshirts = parseInt(contribution.no_of_tshirts) || 0;
+      const cementBags = parseInt(contribution.no_of_cement_bags) || 0;
+      const amount = parseFloat(contribution.total_contributed) || 0;
+
+      groups[mutupoName].totalAmount += amount;
+      groups[mutupoName].totalTshirts += tshirts;
+      groups[mutupoName].totalCementBags += cementBags;
     });
 
     // Convert to array and sort by mutupo name
@@ -107,20 +111,21 @@ export default function Index({ auth, contributions, permissions }) {
     return ["all", ...mitupos];
   }, [contributions]);
 
-  // Calculate overall totals
-  const totalContributions = contributions.reduce(
-    (sum, contribution) => sum + parseFloat(contribution.total_contributed),
-    0
-  );
+  // Calculate overall totals - FIXED VERSION
+  const totalContributions = contributions.reduce((sum, contribution) => {
+    const amount = parseFloat(contribution.total_contributed) || 0;
+    return sum + amount;
+  }, 0);
 
-  const totalTshirts = contributions.reduce(
-    (sum, c) => sum + c.no_of_tshirts,
-    0
-  );
-  const totalCementBags = contributions.reduce(
-    (sum, c) => sum + c.no_of_cement_bags,
-    0
-  );
+  const totalTshirts = contributions.reduce((sum, contribution) => {
+    const tshirts = parseInt(contribution.no_of_tshirts) || 0;
+    return sum + tshirts;
+  }, 0);
+
+  const totalCementBags = contributions.reduce((sum, contribution) => {
+    const cementBags = parseInt(contribution.no_of_cement_bags) || 0;
+    return sum + cementBags;
+  }, 0);
 
   const handleImportSubmit = (e) => {
     e.preventDefault();
@@ -542,7 +547,7 @@ export default function Index({ auth, contributions, permissions }) {
                               {group.contributions.length !== 1 ? "s" : ""}
                             </div>
                             <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                              ${group.totalAmount.toFixed(2)}
+                              ${(parseFloat(group.totalAmount) || 0).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -603,25 +608,34 @@ export default function Index({ auth, contributions, permissions }) {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm text-gray-900 dark:text-gray-100">
-                                    {contribution.no_of_tshirts} pcs
+                                    {parseInt(contribution.no_of_tshirts) || 0}{" "}
+                                    pcs
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    ${contribution.tshirt_amount}
+                                    $
+                                    {parseFloat(
+                                      contribution.tshirt_amount || 0
+                                    ).toFixed(2)}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm text-gray-900 dark:text-gray-100">
-                                    {contribution.no_of_cement_bags} bags
+                                    {parseInt(contribution.no_of_cement_bags) ||
+                                      0}{" "}
+                                    bags
                                   </div>
                                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    ${contribution.cement_amount}
+                                    $
+                                    {parseFloat(
+                                      contribution.cement_amount || 0
+                                    ).toFixed(2)}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-semibold text-green-600 dark:text-green-400">
                                     $
                                     {parseFloat(
-                                      contribution.total_contributed
+                                      contribution.total_contributed || 0
                                     ).toFixed(2)}
                                   </div>
                                 </td>
@@ -676,13 +690,16 @@ export default function Index({ auth, contributions, permissions }) {
                                 Group Total:
                               </td>
                               <td className="px-6 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {group.totalTshirts} pcs
+                                {parseInt(group.totalTshirts) || 0} pcs
                               </td>
                               <td className="px-6 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {group.totalCementBags} bags
+                                {parseInt(group.totalCementBags) || 0} bags
                               </td>
                               <td className="px-6 py-3 text-sm font-bold text-green-600 dark:text-green-400">
-                                ${group.totalAmount.toFixed(2)}
+                                $
+                                {(parseFloat(group.totalAmount) || 0).toFixed(
+                                  2
+                                )}
                               </td>
                               <td></td>
                             </tr>
