@@ -26,8 +26,18 @@ class DatabaseSeeder extends Seeder
             ['email' => 'finance@sumc.co.zw'],
             [
                 'name' => 'TaskForce Finance User',
-                'password' => bcrypt('SUMC2025*'),
+                'password' => bcrypt('BuildingFund@2025'),
                 'role' => 'user',
+                'email_verified_at' => time()
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'taskforce@sumc.co.zw'], 
+            [
+                'name' => 'TaskForce Finance General',
+                'password' => bcrypt('Taskforce@2025'), 
+                'role' => 'general',
                 'email_verified_at' => time()
             ]
         );

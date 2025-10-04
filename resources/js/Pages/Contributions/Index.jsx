@@ -22,26 +22,30 @@ export default function Index({ auth, contributions, permissions }) {
     csv_file: null,
   });
 
-  // Destructure permissions
-  const { canEdit, canDelete, canImport, canCreate } = permissions;
+  // Destructure permissions - now includes canViewAll
+  const { canEdit, canDelete, canImport, canCreate, canViewAll } = permissions;
 
-  // Fetch mitupo data for template
+  // Fetch mitupo data for template - only if user can import
   useEffect(() => {
-    const fetchMitupoData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(route("contributions.mitupo-data"));
-        const data = await response.json();
-        setMitupoData(data);
-      } catch (error) {
-        console.error("Failed to fetch mitupo data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (canImport) {
+      const fetchMitupoData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch(route("contributions.mitupo-data"));
+          if (response.ok) {
+            const data = await response.json();
+            setMitupoData(data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch mitupo data:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchMitupoData();
-  }, []);
+      fetchMitupoData();
+    }
+  }, [canImport]);
 
   // Group contributions by mitupo - FIXED VERSION
   const groupedContributions = useMemo(() => {
@@ -138,6 +142,7 @@ export default function Index({ auth, contributions, permissions }) {
   };
 
   const handleExport = () => {
+    // General users cannot export, this will be handled by the backend
     window.location.href = route("contributions.export");
   };
 
@@ -189,6 +194,11 @@ export default function Index({ auth, contributions, permissions }) {
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Contributions
+            {!canViewAll && (
+              <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+                (My Contributions Only)
+              </span>
+            )}
           </h2>
           <div className="flex space-x-2">
             {canImport && (
@@ -199,12 +209,15 @@ export default function Index({ auth, contributions, permissions }) {
                 Import CSV
               </button>
             )}
-            <button
-              onClick={handleExport}
-              className="bg-green-500 px-3 py-2 text-white rounded shadow transition-all hover:bg-green-600 text-sm font-medium"
-            >
-              Export CSV
-            </button>
+            {/* Show export button only for admin and regular users, not for general users */}
+            {(auth.user.role === 'admin' || auth.user.role === 'user') && (
+              <button
+                onClick={handleExport}
+                className="bg-green-500 px-3 py-2 text-white rounded shadow transition-all hover:bg-green-600 text-sm font-medium"
+              >
+                Export CSV
+              </button>
+            )}
             {canCreate && (
               <Link
                 href={route("contributions.create")}
@@ -489,6 +502,29 @@ export default function Index({ auth, contributions, permissions }) {
             </div>
           </div>
 
+          {/* Role Information Banner */}
+          {auth.user.role === 'general' && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    View Only Access
+                  </h3>
+                  <div className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+                    <p>
+                      As a <strong>General User</strong>, you can view all contributions but cannot create, edit, delete, import, or export records.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Grouped Contributions */}
           <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div className="p-6 text-gray-900 dark:text-gray-100">
@@ -701,7 +737,7 @@ export default function Index({ auth, contributions, permissions }) {
                                   2
                                 )}
                               </td>
-                              <td></td>
+                              {(canEdit || canDelete) && <td></td>}
                             </tr>
                           </tfoot>
                         </table>

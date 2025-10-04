@@ -20,13 +20,18 @@ class ContributionController extends Controller
     {
         $user = Auth::user();
 
-        // If user is admin, show all contributions with user data
-        // If user is regular user, show only their contributions
+        // Permission logic for different roles
         if ($user->role === 'admin') {
             $contributions = Contribution::with(['mutupo', 'contributorType', 'user'])
                 ->latest()
                 ->get();
+        } else if ($user->role === 'general') {
+            // General users can view all contributions but only view
+            $contributions = Contribution::with(['mutupo', 'contributorType', 'user'])
+                ->latest()
+                ->get();
         } else {
+            // Regular users can only view their own contributions
             $contributions = Contribution::with(['mutupo', 'contributorType', 'user'])
                 ->where('user_id', $user->id)
                 ->latest()
@@ -39,13 +44,20 @@ class ContributionController extends Controller
                 'canEdit' => $user->role === 'admin',
                 'canDelete' => $user->role === 'admin',
                 'canImport' => $user->role === 'admin',
-                'canCreate' => true,
+                'canCreate' => $user->role !== 'general', // General users cannot create
+                'canViewAll' => in_array($user->role, ['admin', 'general']), // Both admin and general can view all
             ]
         ]);
     }
 
     public function create()
     {
+        // Check if user is general (cannot create)
+        if (Auth::user()->role === 'general') {
+            return redirect()->route('contributions.index')
+                ->with('error', 'You do not have permission to create contributions.');
+        }
+
         return Inertia::render('Contributions/Create', [
             'mitupos' => Mitupo::all(),
             'contributorTypes' => ContributorType::all(),
@@ -54,6 +66,12 @@ class ContributionController extends Controller
 
     public function store(StoreContributionRequest $request)
     {
+        // Check if user is general (cannot create)
+        if (Auth::user()->role === 'general') {
+            return redirect()->route('contributions.index')
+                ->with('error', 'You do not have permission to create contributions.');
+        }
+
         Contribution::create($request->validated());
 
         return redirect()->route('contributions.index')
@@ -62,7 +80,7 @@ class ContributionController extends Controller
 
     public function edit(Contribution $contribution)
     {
-        // Check if user is admin
+        // Check if user is admin (only admin can edit)
         if (Auth::user()->role !== 'admin') {
             return redirect()->route('contributions.index')
                 ->with('error', 'You do not have permission to edit contributions.');
@@ -76,7 +94,7 @@ class ContributionController extends Controller
 
     public function update(UpdateContributionRequest $request, Contribution $contribution)
     {
-        // Check if user is admin
+        // Check if user is admin (only admin can update)
         if (Auth::user()->role !== 'admin') {
             return redirect()->route('contributions.index')
                 ->with('error', 'You do not have permission to update contributions.');
@@ -89,7 +107,7 @@ class ContributionController extends Controller
 
     public function destroy(Contribution $contribution)
     {
-        // Check if user is admin
+        // Check if user is admin (only admin can delete)
         if (Auth::user()->role !== 'admin') {
             return redirect()->route('contributions.index')
                 ->with('error', 'You do not have permission to delete contributions.');
@@ -102,7 +120,7 @@ class ContributionController extends Controller
 
     public function import(Request $request)
     {
-        // Check if user is admin
+        // Check if user is admin (only admin can import)
         if (Auth::user()->role !== 'admin') {
             return redirect()->route('contributions.index')
                 ->with('error', 'You do not have permission to import contributions.');
@@ -176,9 +194,24 @@ class ContributionController extends Controller
 
     public function export()
     {
-        $contributions = Contribution::with(['mutupo', 'contributorType'])
-            ->latest()
-            ->get();
+        $user = Auth::user();
+
+        // General users cannot export
+        if ($user->role === 'general') {
+            return redirect()->route('contributions.index')
+                ->with('error', 'You do not have permission to export contributions.');
+        }
+
+        if ($user->role === 'admin') {
+            $contributions = Contribution::with(['mutupo', 'contributorType'])
+                ->latest()
+                ->get();
+        } else {
+            $contributions = Contribution::with(['mutupo', 'contributorType'])
+                ->where('user_id', $user->id)
+                ->latest()
+                ->get();
+        }
 
         $filename = "contributions_" . now()->format('Y-m-d_H-i-s') . ".csv";
 
@@ -228,6 +261,11 @@ class ContributionController extends Controller
     // Helper method to get mitupo IDs for the template
     public function getMitupoData()
     {
+        // General users cannot access this
+        if (Auth::user()->role === 'general') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $mitupos = Mitupo::all()->map(function ($mitupo) {
             return [
                 'id' => $mitupo->id,
