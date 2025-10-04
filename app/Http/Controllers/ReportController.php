@@ -219,7 +219,6 @@ class ReportController extends Controller
                 'no_of_cement_bags' => $contribution->no_of_cement_bags,
                 'cement_amount' => (float) $contribution->cement_amount,
                 'total_contributed' => (float) $contribution->total_contributed,
-                'contribution_date' => $contribution->created_at->format('Y-m-d H:i:s'),
             ];
         })->toArray();
     }

@@ -8,7 +8,10 @@ import { Link } from "@inertiajs/react";
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] =
     useState(false);
-    const { flash } = usePage().props;
+  const { flash } = usePage().props;
+
+  // Check if user is admin
+  const isAdmin = user.role === "admin";
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -75,7 +78,11 @@ export default function Authenticated({ user, header, children }) {
                         className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
                       >
                         {user.name}
-
+                        {isAdmin && (
+                          <span className="ms-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            Admin
+                          </span>
+                        )}
                         <svg
                           className="ms-2 -me-0.5 h-4 w-4"
                           xmlns="http://www.w3.org/2000/svg"
@@ -93,9 +100,12 @@ export default function Authenticated({ user, header, children }) {
                   </Dropdown.Trigger>
 
                   <Dropdown.Content>
-                    <Dropdown.Link href={route("profile.edit")}>
-                      Profile
-                    </Dropdown.Link>
+                    {/* Only show Profile link for admin users */}
+                    {isAdmin && (
+                      <Dropdown.Link href={route("profile.edit")}>
+                        Profile
+                      </Dropdown.Link>
+                    )}
                     <Dropdown.Link
                       href={route("logout")}
                       method="post"
@@ -185,6 +195,11 @@ export default function Authenticated({ user, header, children }) {
             <div className="px-4">
               <div className="font-medium text-base text-gray-800 dark:text-gray-200">
                 {user.name}
+                {isAdmin && (
+                  <span className="ms-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    Admin
+                  </span>
+                )}
               </div>
               <div className="font-medium text-sm text-gray-500">
                 {user.email}
@@ -192,9 +207,12 @@ export default function Authenticated({ user, header, children }) {
             </div>
 
             <div className="mt-3 space-y-1">
-              <ResponsiveNavLink href={route("profile.edit")}>
-                Profile
-              </ResponsiveNavLink>
+              {/* Only show Profile link for admin users in mobile view */}
+              {isAdmin && (
+                <ResponsiveNavLink href={route("profile.edit")}>
+                  Profile
+                </ResponsiveNavLink>
+              )}
               <ResponsiveNavLink
                 method="post"
                 href={route("logout")}
