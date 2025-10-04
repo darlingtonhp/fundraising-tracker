@@ -18,8 +18,10 @@ class DashboardController extends Controller
         // Base query for contributions
         $contributionQuery = Contribution::query();
 
-        // Apply user-based filtering for non-admin users
-        if ($user->role !== 'admin') {
+        // Apply user-based filtering
+        // Admin and General users can see all contributions
+        // Regular users can only see their own contributions
+        if ($user->role === 'user') {
             $contributionQuery->where('user_id', $user->id);
         }
 
@@ -32,7 +34,8 @@ class DashboardController extends Controller
         $recentContributionsQuery = Contribution::with(['mutupo', 'contributorType'])
             ->latest();
 
-        if ($user->role !== 'admin') {
+        // Apply the same filtering for recent contributions
+        if ($user->role === 'user') {
             $recentContributionsQuery->where('user_id', $user->id);
         }
 
@@ -41,24 +44,25 @@ class DashboardController extends Controller
         // Contributions by mutupo with user filtering
         $mutupoQuery = Mitupo::query();
 
-        if ($user->role !== 'admin') {
-            // For non-admin users, only show mutupos that have contributions from this user
+        if ($user->role === 'user') {
+            // For regular users, only show mutupos that have contributions from this user
             $mutupoQuery->whereHas('contributions', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
         }
+        // Admin and General users can see all mutupos with contributions
 
         $contributionsByMutupo = $mutupoQuery
             ->withCount([
                 'contributions as total_contributors' => function ($query) use ($user) {
-                    if ($user->role !== 'admin') {
+                    if ($user->role === 'user') {
                         $query->where('user_id', $user->id);
                     }
                 }
             ])
             ->withSum([
                 'contributions as total_amount' => function ($query) use ($user) {
-                    if ($user->role !== 'admin') {
+                    if ($user->role === 'user') {
                         $query->where('user_id', $user->id);
                     }
                 }
@@ -75,7 +79,8 @@ class DashboardController extends Controller
             ],
             'recentContributions' => $recentContributions,
             'contributionsByMutupo' => $contributionsByMutupo,
-            'isAdmin' => $user->role === 'admin', // Optional: pass admin status to frontend
+            'userRole' => $user->role, // Pass user role to frontend
+            'canViewAll' => in_array($user->role, ['admin', 'general']), // Both admin and general can view all
         ]);
     }
 }

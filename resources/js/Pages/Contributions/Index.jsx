@@ -194,11 +194,6 @@ export default function Index({ auth, contributions, permissions }) {
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Contributions
-            {!canViewAll && (
-              <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
-                (My Contributions Only)
-              </span>
-            )}
           </h2>
           <div className="flex space-x-2">
             {canImport && (
