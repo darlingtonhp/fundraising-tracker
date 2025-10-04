@@ -16,13 +16,19 @@ class MitupoController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. Only administrators can add mitupo.');
+        }
         return Inertia::render('Mitupos/Create');
     }
 
     public function store(Request $request)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. Only administrators can add mitupo.');
+        }
         $request->validate([
             'name' => 'required|string|unique:mitupos',
             'description' => 'nullable|string',
@@ -33,8 +39,11 @@ class MitupoController extends Controller
         return redirect()->route('mitupos.index')->with('success', 'Mutupo added successfully!');
     }
 
-    public function edit(Mitupo $mitupo)
+    public function edit(Request $request, Mitupo $mitupo)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. Only administrators can edit mitupo.');
+        }
         return Inertia::render('Mitupos/Edit', [
             'mitupo' => $mitupo,
         ]);
@@ -42,6 +51,9 @@ class MitupoController extends Controller
 
     public function update(Request $request, Mitupo $mitupo)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. Only administrators can update mitupo.');
+        }
         $request->validate([
             'name' => 'required|string|unique:mitupos,name,' . $mitupo->id,
             'description' => 'nullable|string',
@@ -52,8 +64,11 @@ class MitupoController extends Controller
         return redirect()->route('mitupos.index')->with('success', 'Mutupo updated successfully!');
     }
 
-    public function destroy(Mitupo $mitupo)
+    public function destroy(Request $request, Mitupo $mitupo)
     {
+        if ($request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. Only administrators can delete accounts.');
+        }
         $mitupo->delete();
 
         return redirect()->back()->with('success', 'Mutupo deleted successfully!');
