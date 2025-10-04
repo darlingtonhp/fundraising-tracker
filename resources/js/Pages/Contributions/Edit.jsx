@@ -5,7 +5,12 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 
-export default function Edit({ auth, contribution, mitupos, contributorTypes }) {
+export default function Edit({
+  auth,
+  contribution,
+  mitupos,
+  contributorTypes,
+}) {
   const { data, setData, put, errors, processing } = useForm({
     contributor_name: contribution.contributor_name || "",
     mutupo_id: contribution.mutupo_id || "",
@@ -13,6 +18,7 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
     no_of_tshirts: contribution.no_of_tshirts || 0,
     no_of_cement_bags: contribution.no_of_cement_bags || 0,
     cement_amount: contribution.cement_amount || 0,
+    use_discounted_tshirt: contribution.use_discounted_tshirt || false, // New field for checkbox
   });
 
   const onSubmit = (e) => {
@@ -20,8 +26,9 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
     put(route("contributions.update", contribution.id));
   };
 
-  // Calculate amounts
-  const tshirtAmount = data.no_of_tshirts * 7;
+  // Calculate T-shirt price based on checkbox
+  const tshirtPrice = data.use_discounted_tshirt ? 5 : 7;
+  const tshirtAmount = data.no_of_tshirts * tshirtPrice;
   const totalAmount = tshirtAmount + (parseFloat(data.cement_amount) || 0);
 
   return (
@@ -45,7 +52,10 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
             >
               {/* Contributor Name */}
               <div className="mt-4">
-                <InputLabel htmlFor="contributor_name" value="Contributor Name *" />
+                <InputLabel
+                  htmlFor="contributor_name"
+                  value="Contributor Name *"
+                />
                 <TextInput
                   id="contributor_name"
                   type="text"
@@ -56,7 +66,10 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                   onChange={(e) => setData("contributor_name", e.target.value)}
                   placeholder="Enter contributor's full name"
                 />
-                <InputError message={errors.contributor_name} className="mt-2" />
+                <InputError
+                  message={errors.contributor_name}
+                  className="mt-2"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -82,13 +95,18 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
 
                 {/* Contributor Type */}
                 <div>
-                  <InputLabel htmlFor="contributor_type_id" value="Contributor Type *" />
+                  <InputLabel
+                    htmlFor="contributor_type_id"
+                    value="Contributor Type *"
+                  />
                   <select
                     id="contributor_type_id"
                     name="contributor_type_id"
                     value={data.contributor_type_id}
                     className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                    onChange={(e) => setData("contributor_type_id", e.target.value)}
+                    onChange={(e) =>
+                      setData("contributor_type_id", e.target.value)
+                    }
                   >
                     <option value="">Select Type</option>
                     {contributorTypes.map((type) => (
@@ -97,14 +115,20 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                       </option>
                     ))}
                   </select>
-                  <InputError message={errors.contributor_type_id} className="mt-2" />
+                  <InputError
+                    message={errors.contributor_type_id}
+                    className="mt-2"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 {/* T-Shirts */}
                 <div>
-                  <InputLabel htmlFor="no_of_tshirts" value="Number of T-Shirts *" />
+                  <InputLabel
+                    htmlFor="no_of_tshirts"
+                    value="Number of T-Shirts *"
+                  />
                   <TextInput
                     id="no_of_tshirts"
                     type="number"
@@ -112,10 +136,32 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                     value={data.no_of_tshirts}
                     className="mt-1 block w-full"
                     min="0"
-                    onChange={(e) => setData("no_of_tshirts", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData("no_of_tshirts", parseInt(e.target.value) || 0)
+                    }
                   />
+
+                  {/* Checkbox for discounted T-shirt */}
+                  <div className="mt-2 flex items-center">
+                    <input
+                      id="use_discounted_tshirt"
+                      type="checkbox"
+                      checked={data.use_discounted_tshirt}
+                      onChange={(e) =>
+                        setData("use_discounted_tshirt", e.target.checked)
+                      }
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="use_discounted_tshirt"
+                      className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                    >
+                      Use $5 T-Shirt price
+                    </label>
+                  </div>
+
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Price per T-Shirt: $7
+                    Price per T-Shirt: ${tshirtPrice}
                   </div>
                   {data.no_of_tshirts > 0 && (
                     <div className="text-sm text-green-600 dark:text-green-400 mt-1">
@@ -123,11 +169,18 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                     </div>
                   )}
                   <InputError message={errors.no_of_tshirts} className="mt-2" />
+                  <InputError
+                    message={errors.use_discounted_tshirt}
+                    className="mt-2"
+                  />
                 </div>
 
                 {/* Cement Bags */}
                 <div>
-                  <InputLabel htmlFor="no_of_cement_bags" value="Number of Cement Bags *" />
+                  <InputLabel
+                    htmlFor="no_of_cement_bags"
+                    value="Number of Cement Bags *"
+                  />
                   <TextInput
                     id="no_of_cement_bags"
                     type="number"
@@ -135,14 +188,25 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                     value={data.no_of_cement_bags}
                     className="mt-1 block w-full"
                     min="0"
-                    onChange={(e) => setData("no_of_cement_bags", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData(
+                        "no_of_cement_bags",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
                   />
-                  <InputError message={errors.no_of_cement_bags} className="mt-2" />
+                  <InputError
+                    message={errors.no_of_cement_bags}
+                    className="mt-2"
+                  />
                 </div>
 
                 {/* Cement Amount */}
                 <div>
-                  <InputLabel htmlFor="cement_amount" value="Cement Amount ($) *" />
+                  <InputLabel
+                    htmlFor="cement_amount"
+                    value="Cement Amount ($) *"
+                  />
                   <TextInput
                     id="cement_amount"
                     type="number"
@@ -151,7 +215,9 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                     className="mt-1 block w-full"
                     min="0"
                     step="0.01"
-                    onChange={(e) => setData("cement_amount", parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData("cement_amount", parseFloat(e.target.value) || 0)
+                    }
                     placeholder="0.00"
                   />
                   <InputError message={errors.cement_amount} className="mt-2" />
@@ -165,25 +231,43 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">T-Shirts:</span>
-                    <div className="font-medium">{contribution.no_of_tshirts} pcs</div>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      T-Shirts:
+                    </span>
+                    <div className="font-medium">
+                      {contribution.no_of_tshirts} pcs
+                    </div>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">T-Shirt Amount:</span>
-                    <div className="font-medium">${parseFloat(contribution.tshirt_amount).toFixed(2)}</div>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      T-Shirt Amount:
+                    </span>
+                    <div className="font-medium">
+                      ${parseFloat(contribution.tshirt_amount).toFixed(2)}
+                    </div>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Cement Bags:</span>
-                    <div className="font-medium">{contribution.no_of_cement_bags} bags</div>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Cement Bags:
+                    </span>
+                    <div className="font-medium">
+                      {contribution.no_of_cement_bags} bags
+                    </div>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Cement Amount:</span>
-                    <div className="font-medium">${parseFloat(contribution.cement_amount).toFixed(2)}</div>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Cement Amount:
+                    </span>
+                    <div className="font-medium">
+                      ${parseFloat(contribution.cement_amount).toFixed(2)}
+                    </div>
                   </div>
                 </div>
                 <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Current Total:</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Current Total:
+                    </span>
                     <span className="text-lg font-bold text-blue-700 dark:text-blue-300">
                       ${parseFloat(contribution.total_contributed).toFixed(2)}
                     </span>
@@ -203,7 +287,8 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                     </span>
                   </div>
                   <div className="text-sm text-green-700 dark:text-green-300 mt-2">
-                    Breakdown: T-Shirts (${tshirtAmount.toFixed(2)}) + Cement (${(parseFloat(data.cement_amount) || 0).toFixed(2)})
+                    Breakdown: T-Shirts (${tshirtAmount.toFixed(2)}) + Cement ($
+                    {(parseFloat(data.cement_amount) || 0).toFixed(2)})
                   </div>
                 </div>
               )}
@@ -221,7 +306,7 @@ export default function Edit({ auth, contribution, mitupos, contributorTypes }) 
                   disabled={processing}
                   className="bg-emerald-500 px-4 py-2 text-white shadow transition-all hover:bg-emerald-600 text-sm h-10 inline-flex items-center disabled:opacity-50"
                 >
-                  {processing ? 'Updating...' : 'Update Contribution'}
+                  {processing ? "Updating..." : "Update Contribution"}
                 </button>
               </div>
             </form>

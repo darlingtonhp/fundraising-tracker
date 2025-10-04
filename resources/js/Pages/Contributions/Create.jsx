@@ -12,12 +12,18 @@ export default function Create({ auth, mitupos, contributorTypes }) {
     no_of_tshirts: 0,
     no_of_cement_bags: 0,
     cement_amount: 0,
+    use_discounted_tshirt: false, // New field for checkbox
   });
 
   const onSubmit = (e) => {
     e.preventDefault();
     post(route("contributions.store"));
   };
+
+  // Calculate T-shirt price based on checkbox
+  const tshirtPrice = data.use_discounted_tshirt ? 5 : 7;
+  const tshirtAmount = data.no_of_tshirts * tshirtPrice;
+  const totalAmount = tshirtAmount + (parseFloat(data.cement_amount) || 0);
 
   return (
     <AuthenticatedLayout
@@ -40,7 +46,10 @@ export default function Create({ auth, mitupos, contributorTypes }) {
             >
               {/* Contributor Name */}
               <div className="mt-4">
-                <InputLabel htmlFor="contributor_name" value="Contributor Name *" />
+                <InputLabel
+                  htmlFor="contributor_name"
+                  value="Contributor Name *"
+                />
                 <TextInput
                   id="contributor_name"
                   type="text"
@@ -51,7 +60,10 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                   onChange={(e) => setData("contributor_name", e.target.value)}
                   placeholder="Enter contributor's full name"
                 />
-                <InputError message={errors.contributor_name} className="mt-2" />
+                <InputError
+                  message={errors.contributor_name}
+                  className="mt-2"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -77,13 +89,18 @@ export default function Create({ auth, mitupos, contributorTypes }) {
 
                 {/* Contributor Type */}
                 <div>
-                  <InputLabel htmlFor="contributor_type_id" value="Contributor Type *" />
+                  <InputLabel
+                    htmlFor="contributor_type_id"
+                    value="Contributor Type *"
+                  />
                   <select
                     id="contributor_type_id"
                     name="contributor_type_id"
                     value={data.contributor_type_id}
                     className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                    onChange={(e) => setData("contributor_type_id", e.target.value)}
+                    onChange={(e) =>
+                      setData("contributor_type_id", e.target.value)
+                    }
                   >
                     <option value="">Select Type</option>
                     {contributorTypes.map((type) => (
@@ -92,14 +109,20 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                       </option>
                     ))}
                   </select>
-                  <InputError message={errors.contributor_type_id} className="mt-2" />
+                  <InputError
+                    message={errors.contributor_type_id}
+                    className="mt-2"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 {/* T-Shirts */}
                 <div>
-                  <InputLabel htmlFor="no_of_tshirts" value="Number of T-Shirts *" />
+                  <InputLabel
+                    htmlFor="no_of_tshirts"
+                    value="Number of T-Shirts *"
+                  />
                   <TextInput
                     id="no_of_tshirts"
                     type="number"
@@ -107,22 +130,51 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                     value={data.no_of_tshirts}
                     className="mt-1 block w-full"
                     min="0"
-                    onChange={(e) => setData("no_of_tshirts", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData("no_of_tshirts", parseInt(e.target.value) || 0)
+                    }
                   />
+
+                  {/* Checkbox for discounted T-shirt */}
+                  <div className="mt-2 flex items-center">
+                    <input
+                      id="use_discounted_tshirt"
+                      type="checkbox"
+                      checked={data.use_discounted_tshirt}
+                      onChange={(e) =>
+                        setData("use_discounted_tshirt", e.target.checked)
+                      }
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="use_discounted_tshirt"
+                      className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                    >
+                      Use $5 T-Shirt price
+                    </label>
+                  </div>
+
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Price per T-Shirt: $7
+                    Price per T-Shirt: ${tshirtPrice}
                   </div>
                   {data.no_of_tshirts > 0 && (
                     <div className="text-sm text-green-600 dark:text-green-400 mt-1">
-                      T-Shirt Amount: ${(data.no_of_tshirts * 7).toFixed(2)}
+                      T-Shirt Amount: ${tshirtAmount.toFixed(2)}
                     </div>
                   )}
                   <InputError message={errors.no_of_tshirts} className="mt-2" />
+                  <InputError
+                    message={errors.use_discounted_tshirt}
+                    className="mt-2"
+                  />
                 </div>
 
                 {/* Cement Bags */}
                 <div>
-                  <InputLabel htmlFor="no_of_cement_bags" value="Number of Cement Bags *" />
+                  <InputLabel
+                    htmlFor="no_of_cement_bags"
+                    value="Number of Cement Bags *"
+                  />
                   <TextInput
                     id="no_of_cement_bags"
                     type="number"
@@ -130,14 +182,25 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                     value={data.no_of_cement_bags}
                     className="mt-1 block w-full"
                     min="0"
-                    onChange={(e) => setData("no_of_cement_bags", parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData(
+                        "no_of_cement_bags",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
                   />
-                  <InputError message={errors.no_of_cement_bags} className="mt-2" />
+                  <InputError
+                    message={errors.no_of_cement_bags}
+                    className="mt-2"
+                  />
                 </div>
 
                 {/* Cement Amount */}
                 <div>
-                  <InputLabel htmlFor="cement_amount" value="Cement Amount ($) *" />
+                  <InputLabel
+                    htmlFor="cement_amount"
+                    value="Cement Amount ($) *"
+                  />
                   <TextInput
                     id="cement_amount"
                     type="number"
@@ -146,7 +209,9 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                     className="mt-1 block w-full"
                     min="0"
                     step="0.01"
-                    onChange={(e) => setData("cement_amount", parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setData("cement_amount", parseFloat(e.target.value) || 0)
+                    }
                     placeholder="0.00"
                   />
                   <InputError message={errors.cement_amount} className="mt-2" />
@@ -161,11 +226,12 @@ export default function Create({ auth, mitupos, contributorTypes }) {
                       Total Contribution:
                     </span>
                     <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      ${((data.no_of_tshirts * 7) + (parseFloat(data.cement_amount) || 0)).toFixed(2)}
+                      ${totalAmount.toFixed(2)}
                     </span>
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    Breakdown: T-Shirts (${(data.no_of_tshirts * 7).toFixed(2)}) + Cement (${(parseFloat(data.cement_amount) || 0).toFixed(2)})
+                    Breakdown: T-Shirts (${tshirtAmount.toFixed(2)}) + Cement ($
+                    {(parseFloat(data.cement_amount) || 0).toFixed(2)})
                   </div>
                 </div>
               )}
