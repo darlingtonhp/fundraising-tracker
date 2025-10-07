@@ -12,7 +12,7 @@ export default function Create({ auth, mitupos, contributorTypes }) {
     no_of_tshirts: 0,
     no_of_cement_bags: 0,
     cement_amount: 0,
-    use_discounted_tshirt: false, // New field for checkbox
+    use_discounted_tshirt: false,
   });
 
   const onSubmit = (e) => {

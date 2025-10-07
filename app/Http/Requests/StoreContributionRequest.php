@@ -22,7 +22,9 @@ class StoreContributionRequest extends FormRequest
             'no_of_tshirts' => 'required|integer|min:0',
             'no_of_cement_bags' => 'required|integer|min:0',
             'cement_amount' => 'required|numeric|min:0',
-            'user_id' => 'required|exists:users,id', // Add this line
+            'user_id' => 'required|exists:users,id',
+            'use_discounted_tshirt' => 'boolean',
+             'tshirt_amount' => 'numeric|min:0',
         ];
     }
 

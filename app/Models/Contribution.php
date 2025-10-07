@@ -9,29 +9,32 @@ class Contribution extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id', 'created_at','updated_at'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($contribution) {
-            // Calculate tshirt amount
-            $contribution->tshirt_amount = $contribution->no_of_tshirts * 7;
+            // Calculate tshirt amount based on discounted price
+            $tshirtPrice = $contribution->use_discounted_tshirt ? 5 : 7;
+            $contribution->tshirt_amount = $contribution->no_of_tshirts * $tshirtPrice;
 
             // Calculate total
             $contribution->total_contributed = $contribution->tshirt_amount + $contribution->cement_amount;
         });
 
         static::updating(function ($contribution) {
-            // Recalculate tshirt amount
-            $contribution->tshirt_amount = $contribution->no_of_tshirts * 7;
+            // Recalculate tshirt amount based on discounted price
+            $tshirtPrice = $contribution->use_discounted_tshirt ? 5 : 7;
+            $contribution->tshirt_amount = $contribution->no_of_tshirts * $tshirtPrice;
 
             // Recalculate total
             $contribution->total_contributed = $contribution->tshirt_amount + $contribution->cement_amount;
         });
     }
 
-     public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

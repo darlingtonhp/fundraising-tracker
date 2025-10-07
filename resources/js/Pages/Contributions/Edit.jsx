@@ -18,7 +18,7 @@ export default function Edit({
     no_of_tshirts: contribution.no_of_tshirts || 0,
     no_of_cement_bags: contribution.no_of_cement_bags || 0,
     cement_amount: contribution.cement_amount || 0,
-    use_discounted_tshirt: contribution.use_discounted_tshirt || false, // New field for checkbox
+    use_discounted_tshirt: contribution.use_discounted_tshirt || false,
   });
 
   const onSubmit = (e) => {
