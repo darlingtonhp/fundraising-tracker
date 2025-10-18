@@ -85,6 +85,7 @@ class ReportController extends Controller
         return redirect()->route('reports.index');
     }
 
+
     public function export(Request $request)
     {
         $request->validate([
@@ -105,21 +106,6 @@ class ReportController extends Controller
 
             $filename = $this->generateFilename($request->report_type, $request->format);
 
-            // Check if this is an Inertia request
-            if ($request->header('X-Inertia')) {
-                // For Inertia requests, return JSON with download URL
-                $downloadUrl = route('reports.export.direct', [
-                    'report_type' => $request->report_type,
-                    'start_date' => $request->start_date,
-                    'end_date' => $request->end_date,
-                    'format' => $request->format,
-                    'download' => true
-                ]);
-
-                return response()->json(['download_url' => $downloadUrl]);
-            }
-
-            // Direct download request
             if ($request->format === 'csv') {
                 return $this->exportToCsv($reportData, $filename, $request->report_type);
             }
@@ -127,41 +113,10 @@ class ReportController extends Controller
             return $this->exportToPdf($reportData, $filename);
         } catch (Exception $e) {
             Log::error('Export failed: ' . $e->getMessage());
-
-            if ($request->header('X-Inertia')) {
-                return response()->json(['error' => 'Failed to export report: ' . $e->getMessage()], 500);
-            }
-
             return back()->withErrors(['export' => 'Failed to export report: ' . $e->getMessage()]);
         }
     }
 
-    // Add a direct export route for file downloads
-    public function exportDirect(Request $request)
-    {
-        $request->validate([
-            'report_type' => 'required|in:summary,mitupo,contributor_type,monthly,detailed',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'format' => 'required|in:csv,pdf',
-        ]);
-
-        $user = Auth::user();
-        $reportData = $this->generateReportData(
-            $request->report_type,
-            $request->start_date,
-            $request->end_date,
-            $user
-        );
-
-        $filename = $this->generateFilename($request->report_type, $request->format);
-
-        if ($request->format === 'csv') {
-            return $this->exportToCsv($reportData, $filename, $request->report_type);
-        }
-
-        return $this->exportToPdf($reportData, $filename);
-    }
     private function generateSummaryReport($query)
     {
         $totalContributions = $query->count();
@@ -309,7 +264,7 @@ class ReportController extends Controller
 
         $callback = function () use ($data, $reportType) {
             $file = fopen('php://output', 'w');
-            fwrite($file, "\xEF\xBB\xBF"); 
+            fwrite($file, "\xEF\xBB\xBF");
 
             if (empty($data)) {
                 fputcsv($file, ['No data available for the selected criteria']);

@@ -313,29 +313,41 @@ export default function Index({ auth, reportData: initialReportData }) {
   };
 
   const exportReport = (format) => {
-    setExporting(true);
+    // Get the CSRF token from the meta tag
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute("content");
 
-    router.post(
-      route("reports.export"),
-      {
-        report_type: data.report_type,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        format: format,
-      },
-      {
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-          setExporting(false);
-        },
-        onError: (errors) => {
-          console.error("Export errors:", errors);
-          setExporting(false);
-        },
-        onFinish: () => setExporting(false),
-      }
-    );
+    // Create a form dynamically
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = route("reports.export");
+
+    // Add CSRF token
+    const csrfInput = document.createElement("input");
+    csrfInput.type = "hidden";
+    csrfInput.name = "_token";
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
+    // Add other form data
+    const addField = (name, value) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
+
+    addField("report_type", data.report_type);
+    addField("start_date", data.start_date);
+    addField("end_date", data.end_date);
+    addField("format", format);
+
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
   const renderReport = () => {
