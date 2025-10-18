@@ -312,65 +312,30 @@ export default function Index({ auth, reportData: initialReportData }) {
     });
   };
 
-  const exportReport = async (format) => {
+  const exportReport = (format) => {
     setExporting(true);
-    try {
-      // Create a form data object
-      const formData = new FormData();
-      formData.append("report_type", data.report_type);
-      formData.append("start_date", data.start_date);
-      formData.append("end_date", data.end_date);
-      formData.append("format", format);
 
-      // Use fetch with POST method
-      const response = await fetch(route("reports.export"), {
-        method: "POST",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
-            .content,
+    router.post(
+      route("reports.export"),
+      {
+        report_type: data.report_type,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        format: format,
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          setExporting(false);
         },
-        body: formData,
-      });
-
-      if (response.ok) {
-        // Get the filename from response headers or generate one
-        const contentDisposition = response.headers.get("content-disposition");
-        let filename = `report_${data.report_type}_${
-          new Date().toISOString().split("T")[0]
-        }.${format}`;
-
-        if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-          if (filenameMatch) {
-            filename = filenameMatch[1];
-          }
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      } else {
-        const errorText = await response.text();
-        console.error("Export error:", errorText);
-        throw new Error(
-          `Export failed: ${response.status} ${response.statusText}`
-        );
+        onError: (errors) => {
+          console.error("Export errors:", errors);
+          setExporting(false);
+        },
+        onFinish: () => setExporting(false),
       }
-    } catch (error) {
-      console.error("Error exporting report:", error);
-      alert(
-        `Error exporting report: ${error.message}. Please check the console for details.`
-      );
-    } finally {
-      setExporting(false);
-    }
+    );
   };
 
   const renderReport = () => {

@@ -105,18 +105,63 @@ class ReportController extends Controller
 
             $filename = $this->generateFilename($request->report_type, $request->format);
 
+            // Check if this is an Inertia request
+            if ($request->header('X-Inertia')) {
+                // For Inertia requests, return JSON with download URL
+                $downloadUrl = route('reports.export.direct', [
+                    'report_type' => $request->report_type,
+                    'start_date' => $request->start_date,
+                    'end_date' => $request->end_date,
+                    'format' => $request->format,
+                    'download' => true
+                ]);
+
+                return response()->json(['download_url' => $downloadUrl]);
+            }
+
+            // Direct download request
             if ($request->format === 'csv') {
                 return $this->exportToCsv($reportData, $filename, $request->report_type);
             }
 
-            // For PDF, you would use a PDF library like DomPDF
             return $this->exportToPdf($reportData, $filename);
         } catch (Exception $e) {
             Log::error('Export failed: ' . $e->getMessage());
+
+            if ($request->header('X-Inertia')) {
+                return response()->json(['error' => 'Failed to export report: ' . $e->getMessage()], 500);
+            }
+
             return back()->withErrors(['export' => 'Failed to export report: ' . $e->getMessage()]);
         }
     }
 
+    // Add a direct export route for file downloads
+    public function exportDirect(Request $request)
+    {
+        $request->validate([
+            'report_type' => 'required|in:summary,mitupo,contributor_type,monthly,detailed',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'format' => 'required|in:csv,pdf',
+        ]);
+
+        $user = Auth::user();
+        $reportData = $this->generateReportData(
+            $request->report_type,
+            $request->start_date,
+            $request->end_date,
+            $user
+        );
+
+        $filename = $this->generateFilename($request->report_type, $request->format);
+
+        if ($request->format === 'csv') {
+            return $this->exportToCsv($reportData, $filename, $request->report_type);
+        }
+
+        return $this->exportToPdf($reportData, $filename);
+    }
     private function generateSummaryReport($query)
     {
         $totalContributions = $query->count();
@@ -264,7 +309,7 @@ class ReportController extends Controller
 
         $callback = function () use ($data, $reportType) {
             $file = fopen('php://output', 'w');
-            fwrite($file, "\xEF\xBB\xBF"); // UTF-8 BOM
+            fwrite($file, "\xEF\xBB\xBF"); 
 
             if (empty($data)) {
                 fputcsv($file, ['No data available for the selected criteria']);
@@ -311,7 +356,7 @@ class ReportController extends Controller
 
     private function exportToPdf($data, $filename)
     {
-        // For PDF export, you would use a library like DomPDF
+
         return response()->json([
             'message' => 'PDF export not implemented. Please use CSV export.',
             'data' => $data

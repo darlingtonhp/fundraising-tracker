@@ -18,6 +18,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
     Route::post('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/export-direct', [ReportController::class, 'exportDirect'])->name('reports.export.direct');
 
     // Import/Export routes
     Route::post('/contributions/import', [ContributionController::class, 'import'])->name('contributions.import');
