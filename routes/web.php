@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\MitupoController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\FundDayContributionController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -23,9 +25,19 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/contributions/export', [ContributionController::class, 'export'])->name('contributions.export');
 
     Route::get('/contributions/mitupo-data', [ContributionController::class, 'getMitupoData'])->name('contributions.mitupo-data');
-    // Resource routes - should come LAST
+
     Route::resource('mitupos', MitupoController::class);
     Route::resource('contributions', ContributionController::class);
+
+    // Fund Day Contributions routes
+    Route::resource('fund-day-contributions', FundDayContributionController::class);
+    Route::get('fund-day-contributions/export', [FundDayContributionController::class, 'export'])
+        ->name('fund-day-contributions.export');
+
+    // Projects Routes  
+    Route::resource('projects', ProjectController::class);
+    Route::get('projects/export', [ProjectController::class, 'export'])
+        ->name('projects.export');
 });
 
 Route::middleware('auth')->group(function () {

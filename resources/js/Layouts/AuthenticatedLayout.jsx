@@ -37,7 +37,7 @@ export default function Authenticated({ user, header, children }) {
                 </Link>
               </div>
 
-              <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+              <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                 <NavLink
                   href={route("dashboard")}
                   active={route().current("dashboard")}
@@ -45,23 +45,31 @@ export default function Authenticated({ user, header, children }) {
                   Dashboard
                 </NavLink>
 
-                {/* Fundraising Section Only */}
                 <NavLink
                   href={route("contributions.index")}
-                  active={route().current("contributions.index")}
+                  active={route().current("contributions.*")}
                 >
                   Contributions
                 </NavLink>
+
+                {/* Add new navigation links */}
                 <NavLink
-                  href={route("mitupos.index")}
-                  active={route().current("mitupos.index")}
+                  href={route("fund-day-contributions.index")}
+                  active={route().current("fund-day-contributions.*")}
                 >
-                  Mitupo
+                  Fund Day
                 </NavLink>
-                {/* Add Reports Link */}
+
+                <NavLink
+                  href={route("projects.index")}
+                  active={route().current("projects.*")}
+                >
+                  Projects
+                </NavLink>
+
                 <NavLink
                   href={route("reports.index")}
-                  active={route().current("reports.index")}
+                  active={route().current("reports.*")}
                 >
                   Reports
                 </NavLink>
@@ -170,22 +178,31 @@ export default function Authenticated({ user, header, children }) {
               Dashboard
             </ResponsiveNavLink>
 
-            {/* Fundraising Mobile Navigation Only */}
             <ResponsiveNavLink
               href={route("contributions.index")}
-              active={route().current("contributions.index")}
+              active={route().current("contributions.*")}
             >
               Contributions
             </ResponsiveNavLink>
+
+            {/* Add new responsive navigation links */}
             <ResponsiveNavLink
-              href={route("mitupos.index")}
-              active={route().current("mitupos.index")}
+              href={route("fund-day-contributions.index")}
+              active={route().current("fund-day-contributions.*")}
             >
-              Mitupo
+              Fund Day
             </ResponsiveNavLink>
+
+            <ResponsiveNavLink
+              href={route("projects.index")}
+              active={route().current("projects.*")}
+            >
+              Projects
+            </ResponsiveNavLink>
+
             <ResponsiveNavLink
               href={route("reports.index")}
-              active={route().current("reports.index")}
+              active={route().current("reports.*")}
             >
               Reports
             </ResponsiveNavLink>
