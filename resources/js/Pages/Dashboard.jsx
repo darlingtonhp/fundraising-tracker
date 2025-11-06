@@ -165,8 +165,7 @@ export default function Dashboard({
                     {stats.totalTshirts} shirts
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {stats.totalCementBags + stats.totalFundDayCementBags}{" "}
-                    cement bags
+                    {stats.totalCementBagsCombined} cement bags
                   </p>
                 </div>
               </div>

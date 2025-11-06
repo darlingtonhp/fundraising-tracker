@@ -104,24 +104,27 @@ class DashboardController extends Controller
                 // Combined Stats
                 'combinedTotal' => (float) $combinedTotal,
                 'totalRecords' => $totalRecords,
-                
+
                 // Contributions Stats
                 'totalContributors' => $totalContributions,
                 'totalAmount' => (float) $totalAmount,
-                'totalTshirts' => $totalTshirts,
-                'totalCementBags' => $totalCementBags,
-                
+                'totalTshirts' => (int) $totalTshirts,
+                'totalCementBags' => (int) $totalCementBags,
+
                 // Projects Stats
                 'totalProjects' => $totalProjects,
                 'totalProjectCost' => (float) $totalProjectCost,
                 'totalProjectRevenue' => (float) $totalProjectRevenue,
                 'totalProjectProfit' => (float) $totalProjectProfit,
                 'projectProfitMargin' => $totalProjectRevenue > 0 ? ($totalProjectProfit / $totalProjectRevenue) * 100 : 0,
-                
+
                 // Fund Day Stats
                 'totalFundDayContributions' => $totalFundDayContributions,
                 'totalFundDayAmount' => (float) $totalFundDayAmount,
-                'totalFundDayCementBags' => $totalFundDayCementBags,
+                'totalFundDayCementBags' => (int) $totalFundDayCementBags,
+
+                // Calculated totals
+                'totalCementBagsCombined' => (int) $totalCementBags + (int) $totalFundDayCementBags,
             ],
             'recentContributions' => $recentContributions,
             'recentProjects' => $recentProjects,
