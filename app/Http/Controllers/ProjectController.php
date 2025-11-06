@@ -77,6 +77,8 @@ class ProjectController extends Controller
                 ->with('error', 'You do not have permission to edit projects.');
         }
 
+        $project->load('user');
+
         return Inertia::render('Projects/Edit', [
             'project' => $project
         ]);
