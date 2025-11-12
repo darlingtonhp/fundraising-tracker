@@ -76,6 +76,8 @@ class FundDayContributionController extends Controller
                 ->with('error', 'You do not have permission to edit fund day contributions.');
         }
 
+        $fundDayContribution->load('user');
+
         return Inertia::render('FundDayContributions/Edit', [
             'contribution' => $fundDayContribution
         ]);
