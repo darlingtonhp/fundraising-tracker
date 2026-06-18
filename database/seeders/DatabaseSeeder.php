@@ -44,7 +44,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ContributorTypeSeeder::class,
-            MitupoSeeder::class
+            MitupoSeeder::class,
+            DummyDataSeeder::class
         ]);
     }
 }

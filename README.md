@@ -124,6 +124,30 @@ The system supports tracking contributions by traditional totem groups including
 - Custom date range filtering
 - Real-time data visualization
 
+## 📸 User Interface Showcase
+
+Here are some screenshots of the Streamview UMC Building Fundraising Tracker in action:
+
+### 1. Dashboard & Financial Analytics Overview
+A sleek, modern console featuring metrics for total contributions, fundraising projects, fund day stats, and combined fundraising totals.
+![System Dashboard](public/screenshots/dashboard.png)
+
+### 2. Contributions Management
+An interactive interface where contributions are recorded, tracking both T-shirt sales and cement bag donations.
+![Contributions Management](public/screenshots/contributions.png)
+
+### 3. Totems (Mitupo) Performance
+View and manage contributions grouped by traditional Zimbabwean totem groups to track and compare team performances.
+![Totems/Mitupos Management](public/screenshots/mitupos.png)
+
+### 4. Fundraising Projects
+Track revenue, cost, and profit margins for specific church fundraising projects.
+![Fundraising Projects](public/screenshots/projects.png)
+
+### 5. Detailed Reports & CSV Exports
+Generate summary, totem-based, or monthly reports with filters and export capabilities.
+![Reports System](public/screenshots/reports.png)
+
 ## 🛠 Technical Stack
 
 ### Backend
